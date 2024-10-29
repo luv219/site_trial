@@ -2,10 +2,12 @@ const imageUpload = document.getElementById('imageUpload');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const downloadButton = document.getElementById('downloadButton');
+const imageContainer = document.getElementById('imageContainer');
 
 let uploadedImage = new Image();
+let currentMode = 'burn';
 
-// Handle image upload and display
+// Handle image upload and display on canvas
 imageUpload.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (file) {
@@ -23,53 +25,54 @@ imageUpload.addEventListener('change', (e) => {
   }
 });
 
-// Start burn animation
-function startBurn() {
-  const burnEffect = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 20, canvas.width / 2, canvas.height / 2, canvas.width / 1.2);
-  burnEffect.addColorStop(0, 'rgba(255, 69, 0, 0.8)');
-  burnEffect.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
-
-  ctx.fillStyle = burnEffect;
-  ctx.globalAlpha = 0.7;
-
-  // Simple burn effect loop
-  let burnInterval = setInterval(() => {
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalAlpha *= 0.95;
-    if (ctx.globalAlpha <= 0.1) {
-      clearInterval(burnInterval);
-    }
-  }, 100);
+// Toggle between burn and kiss modes
+function toggleMode() {
+  currentMode = currentMode === 'burn' ? 'kiss' : 'burn';
+  document.getElementById('modeButton').innerText = currentMode === 'burn' ? '🔥 Mode' : '💋 Mode';
 }
 
-// Start kiss animation
-function startKiss() {
-  canvas.addEventListener('click', placeKiss);
+// Start animation at clicked point
+canvas.addEventListener('click', (e) => {
+  const x = e.clientX - canvas.getBoundingClientRect().left;
+  const y = e.clientY - canvas.getBoundingClientRect().top;
+  if (currentMode === 'burn') {
+    startFire(x, y);
+  } else {
+    placeKiss(x, y);
+  }
+});
+
+// Fire effect particles
+function startFire(x, y) {
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.left = `${x + (Math.random() - 0.5) * 30}px`;
+    particle.style.top = `${y + (Math.random() - 0.5) * 30}px`;
+    imageContainer.appendChild(particle);
+
+    setTimeout(() => imageContainer.removeChild(particle), 1000);
+  }
 }
 
-function placeKiss(event) {
-  const kissImage = new Image();
-  kissImage.src = 'https://upload.wikimedia.org/wikipedia/commons/8/88/Red_Lips.png'; // Placeholder kiss mark
-  const x = event.clientX - canvas.getBoundingClientRect().left - 25;
-  const y = event.clientY - canvas.getBoundingClientRect().top - 25;
+// Place kiss effect
+function placeKiss(x, y) {
+  const kissMark = document.createElement('div');
+  kissMark.classList.add('kiss-mark');
+  kissMark.style.left = `${x - 25}px`;
+  kissMark.style.top = `${y - 25}px`;
+  imageContainer.appendChild(kissMark);
 
-  kissImage.onload = () => {
-    ctx.globalAlpha = 1;
-    ctx.drawImage(kissImage, x, y, 50, 50);
-  };
-
-  // Remove the kiss event listener after the first click
-  canvas.removeEventListener('click', placeKiss);
+  setTimeout(() => imageContainer.removeChild(kissMark), 2000);
 }
 
-// Reset image to remove effects
+// Reset image to original
 function resetImage() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
 }
 
-// Download the edited image
+// Download edited image
 function downloadImage() {
   const link = document.createElement('a');
   link.href = canvas.toDataURL('image/png');

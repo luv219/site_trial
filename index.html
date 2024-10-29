@@ -9,7 +9,7 @@
 <body>
   <div class="container">
     <h1>Irritation Eradicator</h1>
-    <p>Upload your image and choose your action:</p>
+    <p>Upload an image, click to erase your irritation with fire or kisses!</p>
 
     <div class="upload-section">
       <input type="file" id="imageUpload" accept="image/*" />
@@ -18,8 +18,7 @@
     </div>
 
     <div class="buttons">
-      <button id="burnButton" onclick="startBurn()">🔥 Burn</button>
-      <button id="kissButton" onclick="startKiss()">💋 Kiss</button>
+      <button id="modeButton" onclick="toggleMode()">🔥/💋 Toggle Mode</button>
     </div>
 
     <div class="image-container" id="imageContainer">
